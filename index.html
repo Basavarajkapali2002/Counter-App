@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Counter</title>
+    <!-- Load Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Custom Tailwind Configuration to define primary, danger, and reset colors
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        // Use Inter as the default font
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        // Recreating the original color intent using custom names
+                        'primary-indigo': '#4f46e5',
+                        'danger-red': '#dc2626',
+                        'reset-amber': '#f59e0b',
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom styles for specific active states not easily covered by default Tailwind */
+        .btn:active:not(:disabled) {
+            transform: translateY(1px);
+        }
+
+        /* UI/UX Enhancement: Keyframes for a quick pulse effect on count change */
+        @keyframes count-pulse {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.03);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .pulse-animation {
+            animation: count-pulse 0.2s ease-out;
+        }
+    </style>
+</head>
+<!-- UPDATED: Changed background color to bg-indigo-50 -->
+
+<body class="bg-indigo-50 flex items-center justify-center min-h-screen p-4 font-sans antialiased">
+    <main>
+        <!-- Counter container now uses Tailwind for styling -->
+        <div
+            class="bg-white p-8 rounded-3xl shadow-2xl max-w-sm w-full transform hover:scale-[1.01] transition duration-300">
+            <h1 class="text-3xl font-extrabold text-gray-900 mb-6 border-b pb-3">Interactive Counter</h1>
+
+            <!-- Count Display: Added transition-all for smoother visual updates and pulse-animation class toggle -->
+            <div id="countDisplay"
+                class="text-8xl font-black text-primary-indigo mb-8 h-24 flex items-center justify-center select-none transition-all duration-100 ease-out"
+                aria-live="polite">
+                0
+            </div>
+
+            <!-- Buttons Container: flex-col on mobile, flex-row on larger screens -->
+            <div class="flex flex-col sm:flex-row gap-4">
+
+                <!-- Decrement Button -->
+                <button id="decrementBtn" class="btn flex-1 py-3 px-4 text-white font-semibold rounded-xl shadow-lg 
+                               bg-danger-red hover:bg-red-700 transition duration-150
+                               disabled:bg-gray-400 disabled:shadow-inner disabled:cursor-not-allowed">
+                    Decrement
+                </button>
+
+                <!-- Reset Button -->
+                <button id="resetBtn" class="btn flex-1 py-3 px-4 text-white font-semibold rounded-xl shadow-lg 
+                               bg-reset-amber hover:bg-amber-600 transition duration-150">
+                    Reset
+                </button>
+
+                <!-- Increment Button -->
+                <button id="incrementBtn" class="btn flex-1 py-3 px-4 text-white font-semibold rounded-xl shadow-lg 
+                               bg-primary-indigo hover:bg-indigo-700 transition duration-150">
+                    Increment
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+            // Use an IIFE (Immediately Invoked Function Expression) to encapsulate the application logic
+            (function () {
+                // State variable for the counter
+                let count = 0;
+
+                // DOM Element references
+                const countDisplay = document.getElementById('countDisplay');
+                const incrementBtn = document.getElementById('incrementBtn');
+                const decrementBtn = document.getElementById('decrementBtn');
+                const resetBtn = document.getElementById('resetBtn');
+
+                /**
+                 * Updates the count display, manages the disabled state, and triggers the pulse animation.
+                 * @param {boolean} animate - Whether to trigger the pulse animation (should be false on initial load).
+                 */
+                function updateDisplay(animate = true) {
+                    // 1. Display the current count
+                    countDisplay.textContent = count;
+
+                    // 2. Trigger UI/UX pulse animation on change
+                    if (animate) {
+                        // Remove class first to ensure re-triggering of animation
+                        countDisplay.classList.remove('pulse-animation');
+
+                        // Re-add class after a slight delay (or next event loop cycle)
+                        // to force the browser to restart the animation.
+                        requestAnimationFrame(() => {
+                            countDisplay.classList.add('pulse-animation');
+                        });
+                    }
+
+                    // 3. Enforce the "never below 0" requirement
+                    if (count <= 0) {
+                        count = 0; // Ensure it's exactly 0
+                        decrementBtn.disabled = true;
+                    } else {
+                        decrementBtn.disabled = false;
+                    }
+                }
+
+                // --- Event Listeners ---
+
+                // Increment Button
+                incrementBtn.addEventListener('click', () => {
+                    count++;
+                    updateDisplay(true);
+                });
+
+                // Decrement Button
+                decrementBtn.addEventListener('click', () => {
+                    // Only decrement if the count is greater than 0
+                    if (count > 0) {
+                        count--;
+                        updateDisplay(true);
+                    }
+                });
+
+                // Reset Button
+                resetBtn.addEventListener('click', () => {
+                    count = 0;
+                    updateDisplay(true);
+                });
+
+                // Initial call when the window loads to set the starting display and button state (no animation)
+                window.onload = () => updateDisplay(false);
+            })();
+    </script>
+</body>
+
+</html>
